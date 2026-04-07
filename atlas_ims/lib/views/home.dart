@@ -1,4 +1,7 @@
 import 'package:atlas_ims/views/search.dart';
+import 'package:atlas_ims/views/list.dart';
+import 'package:atlas_ims/views/settings.dart';
+
 import 'package:flutter/material.dart';
 
 class AtlasHome extends StatefulWidget {
@@ -16,8 +19,9 @@ class _AtlasHomeState extends State<AtlasHome> {
 
   final List<Widget> _pages = [
     const Center(child: Text('Home')),
+    const AtlasList(title: 'List'),
     const AtlasSearch(title: 'Search'),
-    const Center(child: Text('#3')),
+    const AtlasSettings(title: 'Settings'),
   ];
 
   // void _incrementCounter() {
@@ -38,7 +42,10 @@ class _AtlasHomeState extends State<AtlasHome> {
       children: _pages,
     ),
     bottomNavigationBar: BottomNavigationBar(
+      type: BottomNavigationBarType.fixed,
       currentIndex: _selectedIndex,
+      unselectedItemColor: Colors.grey,
+      selectedItemColor: Colors.black,
       onTap: (index) {
         setState(() {
           _selectedIndex = index;
@@ -46,17 +53,21 @@ class _AtlasHomeState extends State<AtlasHome> {
       },
       items: const [
         BottomNavigationBarItem(
-          icon: Icon(Icons.home),
+          icon: Icon(Icons.home_filled),
           label: 'Home',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.list),
+          label: 'List',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.search),
           label: 'Search',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.list),
-          label: 'List',
-        ),
+          icon: Icon(Icons.settings),
+          label: 'Settings',
+          )
       ],
     )
     );

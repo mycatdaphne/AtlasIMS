@@ -11,7 +11,7 @@ class AtlasIMS extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Navigation',
+      title: 'Atlas IMS',
       theme: ThemeData(colorScheme: .fromSeed(seedColor: Colors.lightBlue)),
       home: const AtlasHome(title: 'Atlas IMS'),
     );

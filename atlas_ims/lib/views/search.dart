@@ -14,7 +14,7 @@ class _AtlasSearchState extends State<AtlasSearch> {
   @override
   Widget build(BuildContext context) {
     return Center(
-        child: Text('Test'),
+        child: Text('search test'),
     );
   }
 }
