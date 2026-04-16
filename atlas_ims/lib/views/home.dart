@@ -24,18 +24,13 @@ class _AtlasHomeState extends State<AtlasHome> {
     const AtlasSettings(title: 'Settings'),
   ];
 
-  // void _incrementCounter() {
-  //   setState(() {
-  //     _counter++;
-  //   });
-  //   print('_counter after: $_counter');
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+        titleTextStyle: TextStyle(color: Colors.white, fontSize: 25),
+        backgroundColor: Colors.lightBlue,
     ),
     body: IndexedStack(
       index: _selectedIndex,
