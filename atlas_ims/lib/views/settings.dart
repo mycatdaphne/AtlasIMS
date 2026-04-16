@@ -12,25 +12,26 @@ class AtlasSettings extends StatefulWidget {
 }
 
 class _AtlasSettingsState extends State<AtlasSettings> {
-  final List<({String label, String route})> options = [
-    (label: 'General', route: '/settings/general'),
-  ];
-
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: ListView.separated(
-        itemCount: options.length,
-        separatorBuilder: (context, index) => const Divider(),
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(options[index].label),
-            onTap: () {
-              context.push(options[index].route);
-            },
-          );
-        },
-      ),
+    return ListView(
+      children: [
+        ListTile(
+          title: const Text('General'),
+          onTap: () => context.push('/settings/general'),
+        ),
+        const Divider(),
+        ListTile(
+          title: const Text('Account'),
+          onTap: () => context.push('/settings/account'),
+        ),
+        const Divider(),
+        ListTile(
+          title: const Text('Log Out'),
+          onTap: () {
+          },
+        ),
+      ],
     );
   }
 }
