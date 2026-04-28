@@ -1,6 +1,7 @@
 import 'package:atlas_ims/views/search.dart';
 import 'package:atlas_ims/views/list.dart';
 import 'package:atlas_ims/views/settings.dart';
+import 'package:atlas_ims/views/add.dart';
 
 import 'package:flutter/material.dart';
 
@@ -14,12 +15,12 @@ class AtlasHome extends StatefulWidget {
 }
 
 class _AtlasHomeState extends State<AtlasHome> {
-  // int _counter = 0;
   int _selectedIndex = 0;
 
   final List<Widget> _pages = [
     const Center(child: Text('Home')),
     const AtlasList(title: 'List'),
+    const AtlasAdd(title: 'New Entry'),
     const AtlasSearch(title: 'Search'),
     const AtlasSettings(title: 'Settings'),
   ];
@@ -54,6 +55,10 @@ class _AtlasHomeState extends State<AtlasHome> {
         BottomNavigationBarItem(
           icon: Icon(Icons.list),
           label: 'List',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.plus_one_rounded),
+          label: "Add"
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.search),
