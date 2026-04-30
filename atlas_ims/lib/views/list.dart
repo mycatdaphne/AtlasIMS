@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'package:atlas_ims/data/sqlstorage.dart';
+
+
 class AtlasList extends StatefulWidget {
   const AtlasList ({super.key, required this.title});
 
@@ -10,6 +13,8 @@ class AtlasList extends StatefulWidget {
 }
 
 class _AtlasListState extends State<AtlasList> {
+
+  final _storage = Sqlstorage();
   
   @override
   Widget build(BuildContext context) {
