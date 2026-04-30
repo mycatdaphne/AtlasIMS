@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'dart:async';
 
 import 'schema/entry.dart';
 
@@ -8,6 +9,9 @@ class Sqlstorage {
   late Database db;
 
   static const _entriesTable = 'entries';
+
+  final _entriesController = StreamController<List<Entry>>.broadcast();
+  Stream<List<Entry>> get entriesStream => _entriesController.stream;
 
   Future open(String path) async {
     db = await openDatabase(
@@ -22,10 +26,33 @@ create table $_entriesTable (
   )
 ''');
     });
+    _send();
   }
 
   Future<int> addEntry(Entry entry) async {
-    return await db.insert(_entriesTable, entry.toMap());
+    final id = await db.insert(_entriesTable, entry.toMap());
+    await _send();
+    return id;
+  }
+
+  Future<int> delEntry (int id) async {
+    final e = await db.delete(_entriesTable, where: 'id = ?', whereArgs: [id]);
+    await _send();
+    return e;
+  }
+
+  Future<List<Entry>> retrieveAll() async {
+    final rows = await db.query(_entriesTable, orderBy: 'id ASC');
+    return rows.map((r) => Entry.fromMap(r)).toList();
+  }
+
+  Future<void> _send() async{
+    _entriesController.add(await retrieveAll());
+  }
+
+  Future<void> close() async {
+    await _entriesController.close();
+    await db.close();
   }
 
 

@@ -20,7 +20,7 @@ class _AtlasHomeState extends State<AtlasHome> {
 
   late final List<Widget> _pages = [
     const Center(child: Text('Home')),
-    const AtlasList(title: 'List'),
+    AtlasList(title: 'List', db: widget.storage),
     AtlasAdd(title: 'New Entry', db: widget.storage),
     const AtlasSearch(title: 'Search'),
     const AtlasSettings(title: 'Settings'),
