@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'data/firebase_options.dart';
-import 'package:atlas_ims/data/sqlstorage.dart'; // adjust path
+import 'package:atlas_ims/data/sqlstorage.dart';
 import 'views/home.dart';
 
 Future<void> main() async {
