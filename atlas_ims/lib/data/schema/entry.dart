@@ -2,11 +2,13 @@ class Entry{
   final int? id;
   final String name;
   final int locationId;
+  final String? imagePath;
 
   const Entry({
     this.id,
     required this.name,
     required this.locationId,
+    required this.imagePath
   });
 
   Map<String, dynamic> toMap() {
@@ -15,6 +17,7 @@ class Entry{
       'id':id,
       'name':name,
       'location_id':locationId,
+      'image_path':imagePath,
     };
   }
 
@@ -23,6 +26,7 @@ class Entry{
       id: map['id'] as int?,
       name: map['name'] as String,
       locationId: map['location_id'] as int,
+      imagePath: map['imagePath'] as String,
     );
   }
 

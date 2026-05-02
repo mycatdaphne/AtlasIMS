@@ -1,6 +1,10 @@
 import 'package:atlas_ims/data/sqlstorage.dart';
 import 'package:flutter/material.dart';
 import 'package:atlas_ims/data/schema/entry.dart';
+import 'package:atlas_ims/data/imageservice.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+
 
 class AtlasAdd extends StatefulWidget { 
 
@@ -17,8 +21,10 @@ class _AtlasAddState extends State<AtlasAdd> {
   final _formkey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _locationIdController = TextEditingController();
+  final _imageController = ImageService();
 
   bool _submitting = false;
+  File? _pickedImage;
 
   @override
   void dispose() {
@@ -27,10 +33,24 @@ class _AtlasAddState extends State<AtlasAdd> {
     super.dispose();
   }
 
+  Future<void> _pickImg(ImageSource source) async {
+    try {
+      final file = await _imageController.pickImage(source);
+      if (file == null) return;
+      setState(() => _pickedImage = file);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error picking image: $e')),
+      );
+    }
+  }
+
   Future<void> _submit() async {
     final entry = Entry(
       name :_nameController.text.trim(),
-      locationId: int.parse(_locationIdController.text.trim()),
+      locationId: int.parse(_locationIdController.text.trim())
+      imagePath: ,
     );
 
     final newId = await widget.db.addEntry(entry);
