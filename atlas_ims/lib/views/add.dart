@@ -47,30 +47,53 @@ class _AtlasAddState extends State<AtlasAdd> {
   }
 
   Future<void> _submit() async {
-    final entry = Entry(
-      name :_nameController.text.trim(),
-      locationId: int.parse(_locationIdController.text.trim())
-      imagePath: ,
-    );
+    if (!_formkey.currentState!.validate()) return;
+    setState(() => _submitting = true);
 
-    final newId = await widget.db.addEntry(entry);
+    try {
+      String? savedPath;
+      if (_pickedImage != null) {
+        savedPath = await _imageController.storeImgPath(_pickedImage!);
+      }
 
-    bool _submitting = false;
+      final entry = Entry(
+        name: _nameController.text.trim(),
+        locationId: int.parse(_locationIdController.text.trim()),
+        imagePath: savedPath,
+      );
+      final newId = await widget.db.addEntry(entry);
 
-    _nameController.clear();
-    _locationIdController.clear();
-    _formkey.currentState!.reset();
-  }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Added #$newId')),
+      );
+      _nameController.clear();
+      _locationIdController.clear();
+      _formkey.currentState!.reset();
+      setState(() => _pickedImage = null);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to add $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
+
+
+    }
+
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Add')),
-      body: Center(
+      body: Padding(
+        padding: const EdgeInsets.all(16),
         child: Form(
           key: _formkey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
+          child: ListView(
             children: [
               TextFormField(
                 controller: _nameController,
@@ -80,10 +103,10 @@ class _AtlasAddState extends State<AtlasAdd> {
                 ),
                 textInputAction: TextInputAction.next,
                 validator: (value) {
-                 if (value == null || value.trim().isEmpty) {
-                  return 'Name value is required';
-                }
-                return null;
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Name value is required';
+                  }
+                  return null;
                 },
               ),
               const SizedBox(height: 16),
@@ -93,30 +116,125 @@ class _AtlasAddState extends State<AtlasAdd> {
                   labelText: 'Location Id',
                   border: OutlineInputBorder(),
                 ),
+                keyboardType: TextInputType.number,
                 textInputAction: TextInputAction.done,
-                onFieldSubmitted: (_) =>  _submit(),
+                onFieldSubmitted: (_) => _submit(),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Location ID is required';
+                  }
+                  if (int.tryParse(value.trim()) == null) {
+                    return 'Must be a whole number';
+                  }
+                  return null;
+                },
               ),
+              const SizedBox(height: 16),
+
+              // ----- IMAGE SECTION -----
+              _buildImagePreview(),
               const SizedBox(height: 24),
+
               ElevatedButton(
-              onPressed: _submitting ? null : _submit,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical:14),
-                backgroundColor: Colors.lightBlue,
-                foregroundColor: Colors.white,
-              ),
-              child: _submitting ?
-              const SizedBox(
-                height: 20,
-                width: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white,
+                onPressed: _submitting ? null : _submit,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  backgroundColor: Colors.lightBlue,
+                  foregroundColor: Colors.white,
                 ),
-              )
-              : const Text('Add Entry'),
-              )
+                child: _submitting
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text('Add Entry'),
+              ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImagePreview() {
+    return Stack(
+      children: [
+        InkWell(
+          onTap: _showImageSourceSheet,
+          child: Container(
+            height: 180,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade200,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey.shade400),
+            ),
+            child: _pickedImage == null
+                ? const Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.add_a_photo, size: 40, color: Colors.grey),
+                      SizedBox(height: 8),
+                      Text(
+                        'Tap to add photo',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ],
+                  )
+                : ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.file(
+                      _pickedImage!,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                    ),
+                  ),
+          ),
+        ),
+        if (_pickedImage != null)
+          Positioned(
+            top: 4,
+            right: 4,
+            child: Material(
+              color: Colors.black54,
+              shape: const CircleBorder(),
+              child: IconButton(
+                icon: const Icon(Icons.close, color: Colors.white, size: 18),
+                onPressed: () => setState(() => _pickedImage = null),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  void _showImageSourceSheet() {
+    showModalBottomSheet(
+      context: context,
+      builder: (_) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_camera),
+              title: const Text('Take a photo'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImg(ImageSource.camera);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Choose from gallery'),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImg(ImageSource.gallery);
+              },
+            ),
+          ],
         ),
       ),
     );

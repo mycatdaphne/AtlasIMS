@@ -8,7 +8,7 @@ class Entry{
     this.id,
     required this.name,
     required this.locationId,
-    required this.imagePath
+    this.imagePath
   });
 
   Map<String, dynamic> toMap() {
@@ -26,7 +26,7 @@ class Entry{
       id: map['id'] as int?,
       name: map['name'] as String,
       locationId: map['location_id'] as int,
-      imagePath: map['imagePath'] as String,
+      imagePath: map['image_path'] as String,
     );
   }
 
