@@ -31,7 +31,7 @@ class AtlasIMS extends StatelessWidget {
         GoRoute(
           path: '/',
           builder: (context, state) =>
-              AtlasHome(title: 'Atlas IMS', storage: storage),
+              AtlasHome(title: 'Atlas Home', storage: storage),
           routes: [
             GoRoute(
               path: 'settings/general',

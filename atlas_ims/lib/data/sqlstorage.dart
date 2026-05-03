@@ -11,7 +11,13 @@ class Sqlstorage {
   static const _entriesTable = 'entries';
 
   final _entriesController = StreamController<List<Entry>>.broadcast();
-  Stream<List<Entry>> get entriesStream => _entriesController.stream;
+  List<Entry> _latest = const [];
+
+  Stream<List<Entry>> get entriesStream async* {
+    yield _latest;
+    yield* _entriesController.stream;
+  }
+
 
 Future open(String path) async {
   db = await openDatabase(
@@ -54,7 +60,8 @@ Future open(String path) async {
   }
 
   Future<void> _send() async{
-    _entriesController.add(await retrieveAll());
+    _latest = await retrieveAll();
+    _entriesController.add(_latest);
   }
 
   Future<void> close() async {
