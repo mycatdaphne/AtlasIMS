@@ -2,6 +2,7 @@ import 'package:atlas_ims/views/search.dart';
 import 'package:atlas_ims/views/list.dart';
 import 'package:atlas_ims/views/settings.dart';
 import 'package:atlas_ims/views/add.dart';
+import 'package:atlas_ims/views/home_view.dart';
 import 'package:atlas_ims/data/sqlstorage.dart';
 import 'package:flutter/material.dart';
 
@@ -19,7 +20,7 @@ class _AtlasHomeState extends State<AtlasHome> {
   int _selectedIndex = 0;
 
   late final List<Widget> _pages = [
-    const Center(child: Text('Home')),
+    AtlasHomeView(db: widget.storage),
     AtlasList(title: 'List', db: widget.storage),
     AtlasAdd(title: 'New Entry', db: widget.storage),
     const AtlasSearch(title: 'Search'),

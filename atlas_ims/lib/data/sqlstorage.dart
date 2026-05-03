@@ -33,6 +33,7 @@ Future open(String path) async {
       }
     },
   );
+  await _send();
 }
 
   Future<int> addEntry(Entry entry) async {
@@ -60,6 +61,15 @@ Future open(String path) async {
     await _entriesController.close();
     await db.close();
   }
+
+  Future<List<Entry>> retrieveRecent({int limit = 5}) async {
+    final rows = await db.query(
+      _entriesTable,
+      orderBy: 'id DESC',
+      limit: limit,
+    );
+    return rows.map((r) => Entry.fromMap(r)).toList();
+}
 
 
 }
