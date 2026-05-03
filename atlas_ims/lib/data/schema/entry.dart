@@ -26,7 +26,7 @@ class Entry{
       id: map['id'] as int?,
       name: map['name'] as String,
       locationId: map['location_id'] as int,
-      imagePath: map['image_path'] as String,
+      imagePath: map['image_path'] as String?,
     );
   }
 
