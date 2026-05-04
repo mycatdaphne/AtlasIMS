@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:atlas_ims/data/sqlstorage.dart';
 import 'package:atlas_ims/data/schema/entry.dart';
+import 'dart:io';
+
 
 class AtlasList extends StatefulWidget {
   const AtlasList({super.key, required this.title, required this.db});
@@ -13,6 +15,50 @@ class AtlasList extends StatefulWidget {
 }
 
 class _AtlasListState extends State<AtlasList> {
+
+  Widget _buildThumbnail(String? path) {
+    const size = 48.0;
+
+    if (path == null || path.isEmpty) {
+      return Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: const Icon(Icons.image_not_supported,
+            size: 24, color: Colors.grey),
+      );
+    }
+
+    final file = File(path);
+    if (!file.existsSync()) {
+      return Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          color: Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: const Icon(Icons.broken_image, size: 24, color: Colors.grey),
+      );
+    }
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(6),
+      child: Image.file(
+        file,
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+      ),
+    );
+  }
+
+
+    
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<Entry>>(
@@ -67,7 +113,7 @@ class _AtlasListState extends State<AtlasList> {
                 }
               },
               child: ListTile(
-                leading: CircleAvatar(child: Text('${e.id}')),
+                leading: _buildThumbnail(e.imagePath),
                 title: Text(e.name),
                 subtitle: Text('Location ID: ${e.locationId}'),
               ),
