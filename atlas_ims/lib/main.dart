@@ -5,6 +5,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'data/firebase_options.dart';
 import 'package:atlas_ims/data/sqlstorage.dart';
 import 'views/home.dart';
+import 'package:atlas_ims/views/sett_sub_p/sett_tags.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,6 +39,10 @@ class AtlasIMS extends StatelessWidget {
               builder: (context, state) =>
                   const AtlasSettGen(title: 'General'),
             ),
+            GoRoute(
+              path: 'settings/tags',
+              builder: (context, state) => AtlasSettTags(db: storage),
+            )
           ],
         ),
       ],

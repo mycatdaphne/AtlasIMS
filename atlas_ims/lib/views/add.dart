@@ -4,6 +4,7 @@ import 'package:atlas_ims/data/schema/entry.dart';
 import 'package:atlas_ims/data/imageservice.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:atlas_ims/views/widget/tag_picker.dart';
 
 
 class AtlasAdd extends StatefulWidget { 
@@ -46,6 +47,8 @@ class _AtlasAddState extends State<AtlasAdd> {
     }
   }
 
+  Set<int> _selectedTagIds = {};
+
   Future<void> _submit() async {
     if (!_formkey.currentState!.validate()) return;
     setState(() => _submitting = true);
@@ -61,7 +64,10 @@ class _AtlasAddState extends State<AtlasAdd> {
         locationId: int.parse(_locationIdController.text.trim()),
         imagePath: savedPath,
       );
-      final newId = await widget.db.addEntry(entry);
+      final newId = await widget.db.addEntry(
+        entry,
+        tagIds: _selectedTagIds.toList(),
+      );
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -70,7 +76,10 @@ class _AtlasAddState extends State<AtlasAdd> {
       _nameController.clear();
       _locationIdController.clear();
       _formkey.currentState!.reset();
-      setState(() => _pickedImage = null);
+      setState(() {
+        _pickedImage = null;
+        _selectedTagIds = {};
+      });
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -131,8 +140,20 @@ class _AtlasAddState extends State<AtlasAdd> {
               ),
               const SizedBox(height: 16),
 
-              // ----- IMAGE SECTION -----
               _buildImagePreview(),
+              const SizedBox(height: 24),
+
+              const SizedBox(height: 16),
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text('Tags', style: TextStyle(fontWeight: FontWeight.w600)),
+              ),
+              const SizedBox(height: 8),
+              TagPicker(
+                db: widget.db,
+                selectedIds: _selectedTagIds,
+                onChanged: (next) => setState(() => _selectedTagIds = next),
+              ),
               const SizedBox(height: 24),
 
               ElevatedButton(

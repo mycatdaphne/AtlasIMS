@@ -73,7 +73,7 @@ class AtlasHomeView extends StatelessWidget {
                 )
               else
                 SizedBox(
-                  height: 260,
+                  height: 265,
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -135,6 +135,29 @@ class _EntryCard extends StatelessWidget {
                   ),
                 ),
                 // add tags
+                if (entry.tags.isNotEmpty) ...[
+                const SizedBox(height: 6),
+                SizedBox(
+                  height: 20,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: entry.tags.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 4),
+                    itemBuilder: (_, i) => Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        entry.tags[i].name,
+                        style: const TextStyle(fontSize: 10),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
               ],
             ),
           ),

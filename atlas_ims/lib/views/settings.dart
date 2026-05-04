@@ -31,6 +31,11 @@ class _AtlasSettingsState extends State<AtlasSettings> {
           onTap: () {
           },
         ),
+        ListTile(
+          title: const Text('Manage Tags'),
+          onTap: () => context.push('/settings/tags'),
+        ),
+        const Divider(),
       ],
     );
   }
