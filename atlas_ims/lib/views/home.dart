@@ -23,7 +23,7 @@ class _AtlasHomeState extends State<AtlasHome> {
     AtlasHomeView(db: widget.storage),
     AtlasList(title: 'List', db: widget.storage),
     AtlasAdd(title: 'New Entry', db: widget.storage),
-    const AtlasSearch(title: 'Search'),
+    AtlasSearch(title: 'Search', db: widget.storage),
     const AtlasSettings(title: 'Settings'),
   ];
 
