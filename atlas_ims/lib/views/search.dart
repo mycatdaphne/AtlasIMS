@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:atlas_ims/data/sqlstorage.dart';
 import 'package:atlas_ims/data/schema/entry.dart';
+import 'package:go_router/go_router.dart';
 
 class AtlasSearch extends StatefulWidget {
   const AtlasSearch({super.key, required this.title, required this.db});
@@ -112,6 +113,7 @@ class _AtlasSearchState extends State<AtlasSearch> {
                                 ),
                             ],
                           ),
+                          onTap: () => context.push('/entries/${e.id}'),
                   );
                 },
               );

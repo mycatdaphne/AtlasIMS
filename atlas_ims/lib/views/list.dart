@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:atlas_ims/data/sqlstorage.dart';
 import 'package:atlas_ims/data/schema/entry.dart';
 import 'dart:io';
+import 'package:go_router/go_router.dart';
 
 
 class AtlasList extends StatefulWidget {
@@ -116,6 +117,7 @@ class _AtlasListState extends State<AtlasList> {
                 leading: _buildThumbnail(e.imagePath),
                 title: Text(e.name),
                 subtitle: Text('Location ID: ${e.locationId}'),
+                onTap: () => context.push('/entries/${e.id}'),
               ),
             );
           },

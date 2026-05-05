@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:atlas_ims/data/sqlstorage.dart';
 import 'package:atlas_ims/data/schema/entry.dart';
+import 'package:go_router/go_router.dart';
 
 class AtlasHomeView extends StatelessWidget {
   const AtlasHomeView({super.key, required this.db});
@@ -79,7 +80,15 @@ class AtlasHomeView extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     itemCount: recent.length,
                     separatorBuilder: (_, __) => const SizedBox(width: 12),
-                    itemBuilder: (_, i) => _EntryCard(entry: recent[i]),
+                    itemBuilder: (_, i) {
+                      final entry = recent[i];
+                      return InkWell(
+                        onTap: () => context.push('/entries/${entry.id}'),
+                        borderRadius: BorderRadius.circular(12),
+                        child: _EntryCard(entry: entry),
+                      );
+                    },
+
                   ),
                 ),
             ],
