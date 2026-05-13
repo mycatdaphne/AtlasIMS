@@ -94,7 +94,7 @@ class _AtlasSearchState extends State<AtlasSearch> {
                     leading: _buildThumbnail(e.imagePath),
                     title: Text(e.name),
                     subtitle: e.tags.isEmpty
-                        ? Text('Location ID: ${e.locationId}')
+                        ? null
                         : Wrap(
                             spacing: 4,
                             children: [

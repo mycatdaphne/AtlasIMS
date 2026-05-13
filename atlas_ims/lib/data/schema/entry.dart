@@ -13,7 +13,7 @@ class Entry {
   const Entry({
     this.id,
     required this.name,
-    required this.locationId,
+    this.locationId = 0,
     this.imagePath,
     this.imageUrl,
     this.tagIds = const [],
@@ -23,7 +23,6 @@ class Entry {
   Map<String, dynamic> toFirestore() {
     return {
       'name': name,
-      'location_id': locationId,
       'image_path': imagePath,
       'image_url': imageUrl,
       'tag_ids': tagIds,

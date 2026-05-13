@@ -114,7 +114,9 @@ class _AtlasListState extends State<AtlasList> {
               child: ListTile(
                 leading: _buildThumbnail(e.imageUrl),
                 title: Text(e.name),
-                subtitle: Text('Location ID: ${e.locationId}'),
+                subtitle: e.tags.isEmpty
+                    ? null
+                    : Text(e.tags.map((t) => t.name).join(', ')),
               ),
             );
           },

@@ -111,12 +111,6 @@ class _EntryCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'Location ${entry.locationId}',
-                  style:
-                      TextStyle(fontSize: 12, color: Colors.grey.shade700),
-                ),
                 if (entry.tags.isNotEmpty) ...[
                   const SizedBox(height: 6),
                   SizedBox(

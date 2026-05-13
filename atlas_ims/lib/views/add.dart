@@ -18,7 +18,6 @@ class AtlasAdd extends StatefulWidget {
 class _AtlasAddState extends State<AtlasAdd> {
   final _formkey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  final _locationIdController = TextEditingController();
   final _imageController = ImageService();
 
   bool _submitting = false;
@@ -28,7 +27,6 @@ class _AtlasAddState extends State<AtlasAdd> {
   @override
   void dispose() {
     _nameController.dispose();
-    _locationIdController.dispose();
     super.dispose();
   }
 
@@ -60,7 +58,6 @@ class _AtlasAddState extends State<AtlasAdd> {
 
       final entry = Entry(
         name: _nameController.text.trim(),
-        locationId: int.parse(_locationIdController.text.trim()),
         imagePath: imagePath,
         imageUrl: imageUrl,
       );
@@ -75,7 +72,6 @@ class _AtlasAddState extends State<AtlasAdd> {
         SnackBar(content: Text('Added ${newId.substring(0, 6)}…')),
       );
       _nameController.clear();
-      _locationIdController.clear();
       _formkey.currentState!.reset();
       setState(() {
         _pickedImage = null;
@@ -111,26 +107,6 @@ class _AtlasAddState extends State<AtlasAdd> {
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
                     return 'Name value is required';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _locationIdController,
-                decoration: const InputDecoration(
-                  labelText: 'Location Id',
-                  border: OutlineInputBorder(),
-                ),
-                keyboardType: TextInputType.number,
-                textInputAction: TextInputAction.done,
-                onFieldSubmitted: (_) => _submit(),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Location ID is required';
-                  }
-                  if (int.tryParse(value.trim()) == null) {
-                    return 'Must be a whole number';
                   }
                   return null;
                 },
