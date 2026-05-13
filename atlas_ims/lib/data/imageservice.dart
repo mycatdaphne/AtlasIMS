@@ -29,15 +29,18 @@ class ImageService {
     if (uid == null) {
       throw StateError('Cannot upload image: no signed-in user.');
     }
+    if (!source.existsSync()) {
+      throw StateError('Cannot upload image: selected file no longer exists.');
+    }
 
     final ext = p.extension(source.path).toLowerCase();
     final filename = '${DateTime.now().millisecondsSinceEpoch}$ext';
     final path = 'users/$uid/entries/$filename';
 
     final ref = _storage.ref(path);
-    await ref.putFile(source);
-    final url = await ref.getDownloadURL();
-    return (path: path, url: url);
+    final snapshot = await ref.putFile(source);
+    final url = await snapshot.ref.getDownloadURL();
+    return (path: snapshot.ref.fullPath, url: url);
   }
 
   Future<void> delImg(String path) async {

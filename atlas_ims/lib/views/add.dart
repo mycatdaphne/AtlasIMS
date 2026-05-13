@@ -52,10 +52,15 @@ class _AtlasAddState extends State<AtlasAdd> {
     try {
       String? imagePath;
       String? imageUrl;
+      Object? imageUploadError;
       if (_pickedImage != null) {
-        final result = await _imageController.uploadImage(_pickedImage!);
-        imagePath = result.path;
-        imageUrl = result.url;
+        try {
+          final result = await _imageController.uploadImage(_pickedImage!);
+          imagePath = result.path;
+          imageUrl = result.url;
+        } catch (e) {
+          imageUploadError = e;
+        }
       }
 
       final entry = Entry(
@@ -72,7 +77,13 @@ class _AtlasAddState extends State<AtlasAdd> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Added ${newId.substring(0, 6)}…')),
+        SnackBar(
+          content: Text(
+            imageUploadError == null
+                ? 'Added ${newId.substring(0, 6)}...'
+                : 'Added ${newId.substring(0, 6)} without photo: $imageUploadError',
+          ),
+        ),
       );
       _nameController.clear();
       _formkey.currentState!.reset();

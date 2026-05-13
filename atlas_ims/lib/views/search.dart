@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
 import 'package:atlas_ims/data/schema/entry.dart';
 import 'package:go_router/go_router.dart';
 import 'package:atlas_ims/data/firestore_storage.dart';
@@ -92,7 +91,7 @@ class _AtlasSearchState extends State<AtlasSearch> {
                 itemBuilder: (context, index) {
                   final e = results[index];
                   return ListTile(
-                    leading: _buildThumbnail(e.imagePath),
+                    leading: _buildThumbnail(e.imageUrl),
                     title: Text(e.name),
                     subtitle: e.tags.isEmpty
                         ? Text(e.location?.name ?? 'No location')
@@ -138,10 +137,10 @@ class _AtlasSearchState extends State<AtlasSearch> {
     );
   }
 
-  Widget _buildThumbnail(String? path) {
+  Widget _buildThumbnail(String? url) {
     const size = 48.0;
 
-    if (path == null || path.isEmpty) {
+    if (url == null || url.isEmpty) {
       return Container(
         width: size,
         height: size,
@@ -154,26 +153,30 @@ class _AtlasSearchState extends State<AtlasSearch> {
       );
     }
 
-    final file = File(path);
-    if (!file.existsSync()) {
-      return Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          color: Colors.grey.shade200,
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: const Icon(Icons.broken_image, size: 24, color: Colors.grey),
-      );
-    }
-
     return ClipRRect(
       borderRadius: BorderRadius.circular(6),
-      child: Image.file(
-        file,
+      child: Image.network(
+        url,
         width: size,
         height: size,
         fit: BoxFit.cover,
+        loadingBuilder: (context, child, progress) {
+          if (progress == null) return child;
+          return Container(
+            width: size,
+            height: size,
+            color: Colors.grey.shade200,
+          );
+        },
+        errorBuilder: (_, __, ___) => Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            color: Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: const Icon(Icons.broken_image, size: 24, color: Colors.grey),
+        ),
       ),
     );
   }
