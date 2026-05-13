@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:atlas_ims/data/firestore_storage.dart';
 import 'package:atlas_ims/data/schema/entry.dart';
+import 'package:atlas_ims/data/schema/location.dart';
 
 class AtlasList extends StatefulWidget {
   const AtlasList({super.key, required this.title, required this.db});
@@ -13,6 +14,8 @@ class AtlasList extends StatefulWidget {
 }
 
 class _AtlasListState extends State<AtlasList> {
+  String? _selectedLocationId;
+
   Widget _buildThumbnail(String? url) {
     const size = 48.0;
 
@@ -70,58 +73,131 @@ class _AtlasListState extends State<AtlasList> {
         if (entries.isEmpty) {
           return const Center(child: Text('No entries yet.'));
         }
-        return ListView.separated(
-          itemCount: entries.length,
-          separatorBuilder: (_, __) => const Divider(height: 1),
-          itemBuilder: (context, index) {
-            final e = entries[index];
-            return Dismissible(
-              key: ValueKey(e.id),
-              direction: DismissDirection.endToStart,
-              background: Container(
-                color: Colors.red,
-                alignment: Alignment.centerRight,
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: const Icon(Icons.delete, color: Colors.white),
-              ),
-              confirmDismiss: (_) async {
-                return await showDialog<bool>(
-                  context: context,
-                  builder: (ctx) => AlertDialog(
-                    title: Text('Delete "${e.name}"?'),
-                    content: const Text('This cannot be undone.'),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(ctx, false),
-                        child: const Text('Cancel'),
-                      ),
-                      TextButton(
-                        onPressed: () => Navigator.pop(ctx, true),
-                        child: const Text('Delete'),
-                      ),
-                    ],
-                  ),
-                );
-              },
-              onDismissed: (_) async {
-                await widget.db.delEntry(e.id!);
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Deleted "${e.name}"')),
-                  );
-                }
-              },
-              child: ListTile(
-                leading: _buildThumbnail(e.imageUrl),
-                title: Text(e.name),
-                subtitle: e.tags.isEmpty
-                    ? null
-                    : Text(e.tags.map((t) => t.name).join(', ')),
-              ),
+
+        return StreamBuilder<List<InventoryLocation>>(
+          stream: widget.db.locationsStream,
+          builder: (context, locationSnapshot) {
+            final locations =
+                locationSnapshot.data ?? const <InventoryLocation>[];
+            final selectedLocationId = locations.any((location) {
+              return location.id != null && location.id == _selectedLocationId;
+            })
+                ? _selectedLocationId
+                : null;
+            final visibleEntries = selectedLocationId == null
+                ? entries
+                : entries
+                    .where((entry) => entry.locationId == selectedLocationId)
+                    .toList();
+
+            return Column(
+              children: [
+                if (locations.isNotEmpty)
+                  _buildLocationFilter(locations, selectedLocationId),
+                Expanded(
+                  child: visibleEntries.isEmpty
+                      ? const Center(child: Text('No entries here yet.'))
+                      : ListView.separated(
+                          itemCount: visibleEntries.length,
+                          separatorBuilder: (_, __) => const Divider(height: 1),
+                          itemBuilder: (context, index) {
+                            final e = visibleEntries[index];
+                            return Dismissible(
+                              key: ValueKey(e.id),
+                              direction: DismissDirection.endToStart,
+                              background: Container(
+                                color: Colors.red,
+                                alignment: Alignment.centerRight,
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 20),
+                                child:
+                                    const Icon(Icons.delete, color: Colors.white),
+                              ),
+                              confirmDismiss: (_) async {
+                                return await showDialog<bool>(
+                                  context: context,
+                                  builder: (ctx) => AlertDialog(
+                                    title: Text('Delete "${e.name}"?'),
+                                    content: const Text('This cannot be undone.'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.pop(ctx, false),
+                                        child: const Text('Cancel'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.pop(ctx, true),
+                                        child: const Text('Delete'),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                              onDismissed: (_) async {
+                                await widget.db.delEntry(e.id!);
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text('Deleted "${e.name}"')),
+                                  );
+                                }
+                              },
+                              child: ListTile(
+                                leading: _buildThumbnail(e.imageUrl),
+                                title: Text(e.name),
+                                subtitle: Text(_subtitleFor(e)),
+                              ),
+                            );
+                          },
+                        ),
+                ),
+              ],
             );
           },
         );
       },
     );
+  }
+
+  Widget _buildLocationFilter(
+    List<InventoryLocation> locations,
+    String? selectedLocationId,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.all(12),
+      child: DropdownButtonFormField<String>(
+        value: selectedLocationId ?? '',
+        decoration: const InputDecoration(
+          labelText: 'Location',
+          border: OutlineInputBorder(),
+        ),
+        items: [
+          const DropdownMenuItem(
+            value: '',
+            child: Text('All locations'),
+          ),
+          for (final location in locations)
+            if (location.id != null)
+              DropdownMenuItem(
+                value: location.id!,
+                child: Text(location.name),
+              ),
+        ],
+        onChanged: (value) {
+          setState(() {
+            _selectedLocationId = value == '' ? null : value;
+          });
+        },
+      ),
+    );
+  }
+
+  String _subtitleFor(Entry entry) {
+    final parts = [
+      if (entry.location != null) entry.location!.name,
+      if (entry.tags.isNotEmpty) entry.tags.map((t) => t.name).join(', '),
+    ];
+    return parts.isEmpty ? 'No location' : parts.join(' - ');
   }
 }

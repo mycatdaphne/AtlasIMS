@@ -11,7 +11,7 @@ class AtlasSearch extends StatefulWidget {
   final FirestoreStorage db;
 
   @override
-  State<AtlasSearch> createState () => _AtlasSearchState();
+  State<AtlasSearch> createState() => _AtlasSearchState();
 }
 
 class _AtlasSearchState extends State<AtlasSearch> {
@@ -23,6 +23,7 @@ class _AtlasSearchState extends State<AtlasSearch> {
     if (q.isEmpty) return all;
     return all.where((e) {
       if (e.name.toLowerCase().contains(q)) return true;
+      if (e.location?.name.toLowerCase().contains(q) ?? false) return true;
       if (e.tags.any((t) => t.name.toLowerCase().contains(q))) return true;
       return false;
     }).toList();
@@ -38,7 +39,7 @@ class _AtlasSearchState extends State<AtlasSearch> {
             controller: _controller,
             autofocus: false,
             decoration: InputDecoration(
-              hintText: 'Search by name or tag',
+              hintText: 'Search by name, location, or tag',
               prefixIcon: const Icon(Icons.search),
               suffixIcon: _query.isEmpty
                   ? null
@@ -94,10 +95,23 @@ class _AtlasSearchState extends State<AtlasSearch> {
                     leading: _buildThumbnail(e.imagePath),
                     title: Text(e.name),
                     subtitle: e.tags.isEmpty
-                        ? null
+                        ? Text(e.location?.name ?? 'No location')
                         : Wrap(
                             spacing: 4,
                             children: [
+                              if (e.location != null)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue.shade100,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    e.location!.name,
+                                    style: const TextStyle(fontSize: 10),
+                                  ),
+                                ),
                               for (final tag in e.tags.take(3))
                                 Container(
                                   padding: const EdgeInsets.symmetric(
@@ -113,7 +127,7 @@ class _AtlasSearchState extends State<AtlasSearch> {
                                 ),
                             ],
                           ),
-                          onTap: () => context.push('/entries/${e.id}'),
+                    onTap: () => context.push('/entries/${e.id}'),
                   );
                 },
               );
@@ -123,8 +137,8 @@ class _AtlasSearchState extends State<AtlasSearch> {
       ],
     );
   }
-    // stolen from list.dart
-    Widget _buildThumbnail(String? path) {
+
+  Widget _buildThumbnail(String? path) {
     const size = 48.0;
 
     if (path == null || path.isEmpty) {

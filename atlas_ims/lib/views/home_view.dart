@@ -30,15 +30,9 @@ class AtlasHomeView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: const [
                     Text(
-                      '23 Upper Lake Ct',
+                      'Atlas Inventory',
                       style:
                           TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      'Last Modified: Yesterday 2:37pm',
-                      style:
-                          TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
                     ),
                   ],
                 ),
@@ -111,6 +105,25 @@ class _EntryCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
+                if (entry.location != null) ...[
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(Icons.location_on_outlined,
+                          size: 14, color: Colors.grey.shade700),
+                      const SizedBox(width: 2),
+                      Expanded(
+                        child: Text(
+                          entry.location!.name,
+                          style: TextStyle(
+                              fontSize: 12, color: Colors.grey.shade700),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
                 if (entry.tags.isNotEmpty) ...[
                   const SizedBox(height: 6),
                   SizedBox(

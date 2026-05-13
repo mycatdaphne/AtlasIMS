@@ -8,7 +8,6 @@ class AtlasSettings extends StatefulWidget {
 
   @override
   State<AtlasSettings> createState() => _AtlasSettingsState();
-
 }
 
 class _AtlasSettingsState extends State<AtlasSettings> {
@@ -28,12 +27,16 @@ class _AtlasSettingsState extends State<AtlasSettings> {
         const Divider(),
         ListTile(
           title: const Text('Log Out'),
-          onTap: () {
-          },
+          onTap: () {},
         ),
         ListTile(
           title: const Text('Manage Tags'),
           onTap: () => context.push('/settings/tags'),
+        ),
+        const Divider(),
+        ListTile(
+          title: const Text('Manage Locations'),
+          onTap: () => context.push('/settings/locations'),
         ),
         const Divider(),
       ],

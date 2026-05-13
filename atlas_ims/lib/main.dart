@@ -6,6 +6,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'data/firebase_options.dart';
 import 'package:atlas_ims/data/firestore_storage.dart';
 import 'views/home.dart';
+import 'package:atlas_ims/views/entry.dart';
+import 'package:atlas_ims/views/sett_sub_p/sett_locations.dart';
 import 'package:atlas_ims/views/sett_sub_p/sett_tags.dart';
 
 Future<void> main() async {
@@ -47,7 +49,18 @@ class AtlasIMS extends StatelessWidget {
             GoRoute(
               path: 'settings/tags',
               builder: (context, state) => AtlasSettTags(db: storage),
-            )
+            ),
+            GoRoute(
+              path: 'settings/locations',
+              builder: (context, state) => AtlasSettLocations(db: storage),
+            ),
+            GoRoute(
+              path: 'entries/:id',
+              builder: (context, state) => AtlasEntryDetail(
+                db: storage,
+                entryId: state.pathParameters['id']!,
+              ),
+            ),
           ],
         ),
       ],

@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:atlas_ims/data/schema/entry.dart';
+import 'package:atlas_ims/data/schema/location.dart';
 import 'package:atlas_ims/data/schema/tag.dart';
 
 class FirestoreStorage {
@@ -32,18 +33,27 @@ class FirestoreStorage {
   ];
 
   List<Entry> _latestRawEntries = const [];
+  List<InventoryLocation> _latestLocations = const [];
   List<Tag> _latestTags = const [];
 
   final _entriesController = StreamController<List<Entry>>.broadcast();
+  final _locationsController =
+      StreamController<List<InventoryLocation>>.broadcast();
   final _tagsController = StreamController<List<Tag>>.broadcast();
   List<Entry> _latestJoinedEntries = const [];
 
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _entriesSub;
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _locationsSub;
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _tagsSub;
 
   Stream<List<Entry>> get entriesStream async* {
     yield _latestJoinedEntries;
     yield* _entriesController.stream;
+  }
+
+  Stream<List<InventoryLocation>> get locationsStream async* {
+    yield _latestLocations;
+    yield* _locationsController.stream;
   }
 
   Stream<List<Tag>> get tagsStream async* {
@@ -65,11 +75,20 @@ class FirestoreStorage {
   CollectionReference<Map<String, dynamic>> get _entriesCol =>
       _firestore.collection('users').doc(_uid).collection('entries');
 
+  CollectionReference<Map<String, dynamic>> get _locationsCol =>
+      _firestore.collection('users').doc(_uid).collection('locations');
+
   CollectionReference<Map<String, dynamic>> get _tagsCol =>
       _firestore.collection('users').doc(_uid).collection('tags');
 
   Future<void> init() async {
     await _seedDefaultTagsIfEmpty();
+
+    _locationsSub = _locationsCol.orderBy('name').snapshots().listen((snap) {
+      _latestLocations = snap.docs.map(InventoryLocation.fromFirestore).toList();
+      _locationsController.add(_latestLocations);
+      _recombine();
+    });
 
     _tagsSub = _tagsCol.orderBy('name').snapshots().listen((snap) {
       _latestTags = snap.docs.map(Tag.fromFirestore).toList();
@@ -86,12 +105,19 @@ class FirestoreStorage {
 
   Future<void> close() async {
     await _entriesSub?.cancel();
+    await _locationsSub?.cancel();
     await _tagsSub?.cancel();
     await _entriesController.close();
+    await _locationsController.close();
     await _tagsController.close();
   }
 
   void _recombine() {
+    final locationsById = {
+      for (final location in _latestLocations)
+        if (location.id != null) location.id!: location,
+    };
+
     final tagsById = {
       for (final t in _latestTags)
         if (t.id != null) t.id!: t,
@@ -99,7 +125,11 @@ class FirestoreStorage {
 
     _latestJoinedEntries = [
       for (final e in _latestRawEntries)
-        e.withTags([
+        e
+            .withLocation(
+              e.locationId == null ? null : locationsById[e.locationId],
+            )
+            .withTags([
           for (final tid in e.tagIds)
             if (tagsById[tid] != null) tagsById[tid]!,
         ]),
@@ -151,6 +181,55 @@ class FirestoreStorage {
   Future<List<Tag>> retrieveAllTags() async {
     final snap = await _tagsCol.orderBy('name').get();
     return snap.docs.map(Tag.fromFirestore).toList();
+  }
+
+  Future<List<InventoryLocation>> retrieveAllLocations() async {
+    final snap = await _locationsCol.orderBy('name').get();
+    return snap.docs.map(InventoryLocation.fromFirestore).toList();
+  }
+
+  Future<String> addLocation(String name, {String? address}) async {
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) {
+      throw ArgumentError('Location name cannot be empty');
+    }
+
+    final lower = trimmed.toLowerCase();
+    final existing = _latestLocations.firstWhere(
+      (location) => location.name.toLowerCase() == lower,
+      orElse: () => const InventoryLocation(name: ''),
+    );
+    if (existing.id != null) return existing.id!;
+
+    final doc = _locationsCol.doc();
+    final trimmedAddress = address?.trim();
+    await doc.set({
+      'name': trimmed,
+      'address': trimmedAddress == null || trimmedAddress.isEmpty
+          ? null
+          : trimmedAddress,
+      'created_at': FieldValue.serverTimestamp(),
+    });
+    return doc.id;
+  }
+
+  Future<void> renameLocation(String id, String newName) async {
+    final trimmed = newName.trim();
+    if (trimmed.isEmpty) {
+      throw ArgumentError('Location name cannot be empty');
+    }
+    await _locationsCol.doc(id).update({'name': trimmed});
+  }
+
+  Future<void> delLocation(String id) async {
+    final affected = await _entriesCol.where('location_id', isEqualTo: id).get();
+
+    final batch = _firestore.batch();
+    for (final doc in affected.docs) {
+      batch.update(doc.reference, {'location_id': null});
+    }
+    batch.delete(_locationsCol.doc(id));
+    await batch.commit();
   }
 
   Future<String> addTag(String name) async {

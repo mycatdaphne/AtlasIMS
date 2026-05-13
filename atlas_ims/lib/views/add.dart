@@ -4,6 +4,7 @@ import 'package:atlas_ims/data/schema/entry.dart';
 import 'package:atlas_ims/data/imageservice.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:atlas_ims/views/widget/location_picker.dart';
 import 'package:atlas_ims/views/widget/tag_picker.dart';
 
 class AtlasAdd extends StatefulWidget {
@@ -22,6 +23,7 @@ class _AtlasAddState extends State<AtlasAdd> {
 
   bool _submitting = false;
   File? _pickedImage;
+  String? _selectedLocationId;
   Set<String> _selectedTagIds = {};
 
   @override
@@ -58,6 +60,7 @@ class _AtlasAddState extends State<AtlasAdd> {
 
       final entry = Entry(
         name: _nameController.text.trim(),
+        locationId: _selectedLocationId,
         imagePath: imagePath,
         imageUrl: imageUrl,
       );
@@ -75,6 +78,7 @@ class _AtlasAddState extends State<AtlasAdd> {
       _formkey.currentState!.reset();
       setState(() {
         _pickedImage = null;
+        _selectedLocationId = null;
         _selectedTagIds = {};
       });
     } catch (e) {
@@ -110,6 +114,14 @@ class _AtlasAddState extends State<AtlasAdd> {
                   }
                   return null;
                 },
+              ),
+              const SizedBox(height: 16),
+              LocationPicker(
+                db: widget.db,
+                selectedId: _selectedLocationId,
+                onChanged: (next) => setState(() {
+                  _selectedLocationId = next;
+                }),
               ),
               const SizedBox(height: 16),
               _buildImagePreview(),

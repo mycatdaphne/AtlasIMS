@@ -71,6 +71,12 @@ class AtlasEntryDetail extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 16),
+                      _DetailRow(
+                        icon: Icons.location_on_outlined,
+                        label: 'Location',
+                        value: entry.location?.name ?? 'No location',
+                      ),
+                      const SizedBox(height: 16),
                       const Text(
                         'Tags',
                         style: TextStyle(
@@ -170,5 +176,35 @@ class AtlasEntryDetail extends StatelessWidget {
     if (ok != true) return;
     await db.delEntry(entry.id!);
     if (context.mounted) context.pop();
+  }
+}
+
+class _DetailRow extends StatelessWidget {
+  const _DetailRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, size: 20, color: Colors.grey.shade700),
+        const SizedBox(width: 8),
+        Text(
+          '$label: ',
+          style: TextStyle(
+            color: Colors.grey.shade700,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        Expanded(child: Text(value)),
+      ],
+    );
   }
 }
