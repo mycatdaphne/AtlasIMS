@@ -66,7 +66,7 @@ class FirestoreStorage {
     if (uid == null) {
       throw StateError(
         'FirestoreStorage used before sign-in. '
-        'Make sure FirebaseAuth.instance.signInAnonymously() completes in main().',
+        'Make sure Google sign-in completes before loading inventory.',
       );
     }
     return uid;

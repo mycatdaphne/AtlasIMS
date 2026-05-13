@@ -167,7 +167,7 @@ class _AtlasListState extends State<AtlasList> {
     return Padding(
       padding: const EdgeInsets.all(12),
       child: DropdownButtonFormField<String>(
-        value: selectedLocationId ?? '',
+        initialValue: selectedLocationId ?? '',
         decoration: const InputDecoration(
           labelText: 'Location',
           border: OutlineInputBorder(),
