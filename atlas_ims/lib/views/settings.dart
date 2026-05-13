@@ -38,20 +38,6 @@ class _AtlasSettingsState extends State<AtlasSettings> {
           const Divider(),
         ],
         ListTile(
-          title: const Text('General'),
-          onTap: () => context.push('/settings/general'),
-        ),
-        const Divider(),
-        ListTile(
-          title: const Text('Account'),
-          onTap: () => context.push('/settings/account'),
-        ),
-        const Divider(),
-        ListTile(
-          title: const Text('Log Out'),
-          onTap: () => _confirmSignOut(context),
-        ),
-        ListTile(
           title: const Text('Manage Tags'),
           onTap: () => context.push('/settings/tags'),
         ),
@@ -61,6 +47,10 @@ class _AtlasSettingsState extends State<AtlasSettings> {
           onTap: () => context.push('/settings/locations'),
         ),
         const Divider(),
+        ListTile(
+          title: const Text('Log Out'),
+          onTap: () => _confirmSignOut(context),
+        ),
       ],
     );
   }
