@@ -3,14 +3,14 @@ import 'package:atlas_ims/views/list.dart';
 import 'package:atlas_ims/views/settings.dart';
 import 'package:atlas_ims/views/add.dart';
 import 'package:atlas_ims/views/home_view.dart';
-import 'package:atlas_ims/data/sqlstorage.dart';
+import 'package:atlas_ims/data/firestore_storage.dart';
 import 'package:flutter/material.dart';
 
 class AtlasHome extends StatefulWidget {
   const AtlasHome({super.key, required this.title, required this.storage});
 
   final String title;
-  final Sqlstorage storage;
+  final FirestoreStorage storage;
 
   @override
   State<AtlasHome> createState() => _AtlasHomeState();
@@ -50,26 +50,13 @@ class _AtlasHomeState extends State<AtlasHome> {
           });
         },
         items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.list), label: 'List'),
           BottomNavigationBarItem(
-            icon: Icon(Icons.home_filled),
-            label: 'Home',
-          ),
+              icon: Icon(Icons.plus_one_rounded), label: 'Add'),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
           BottomNavigationBarItem(
-            icon: Icon(Icons.list),
-            label: 'List',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.plus_one_rounded),
-            label: 'Add',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Search',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
+              icon: Icon(Icons.settings), label: 'Settings'),
         ],
       ),
     );

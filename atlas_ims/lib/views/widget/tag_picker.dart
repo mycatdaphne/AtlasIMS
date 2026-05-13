@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:atlas_ims/data/schema/tag.dart';
-import 'package:atlas_ims/data/sqlstorage.dart';
+import 'package:atlas_ims/data/firestore_storage.dart';
 
 class TagPicker extends StatelessWidget {
   const TagPicker({
@@ -10,9 +10,9 @@ class TagPicker extends StatelessWidget {
     required this.onChanged,
   });
 
-  final Sqlstorage db;
-  final Set<int> selectedIds;
-  final ValueChanged<Set<int>> onChanged;
+  final FirestoreStorage db;
+  final Set<String> selectedIds;
+  final ValueChanged<Set<String>> onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -29,9 +29,9 @@ class TagPicker extends StatelessWidget {
                 label: Text(tag.name),
                 selected: selectedIds.contains(tag.id),
                 onSelected: (sel) {
-                  final next = Set<int>.from(selectedIds);
+                  final next = Set<String>.from(selectedIds);
                   if (sel) {
-                    next.add(tag.id!);
+                    if (tag.id != null) next.add(tag.id!);
                   } else {
                     next.remove(tag.id);
                   }

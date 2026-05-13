@@ -1,10 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:atlas_ims/data/schema/tag.dart';
 
-class Entry{
-  final int? id;
+class Entry {
+  final String? id;
   final String name;
   final int locationId;
   final String? imagePath;
+  final String? imageUrl;
+  final List<String> tagIds;
   final List<Tag> tags;
 
   const Entry({
@@ -12,38 +15,46 @@ class Entry{
     required this.name,
     required this.locationId,
     this.imagePath,
-    this.tags = const[],
+    this.imageUrl,
+    this.tagIds = const [],
+    this.tags = const [],
   });
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toFirestore() {
     return {
-      if (id != null)
-      'id':id,
-      'name':name,
-      'location_id':locationId,
-      'image_path':imagePath,
+      'name': name,
+      'location_id': locationId,
+      'image_path': imagePath,
+      'image_url': imageUrl,
+      'tag_ids': tagIds,
+      'created_at': FieldValue.serverTimestamp(),
     };
   }
 
-  factory Entry.fromMap(Map<String, dynamic> map, {List<Tag> tags = const []}) {
+  factory Entry.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
+    final data = doc.data() ?? const <String, dynamic>{};
     return Entry(
-      id: map['id'] as int?,
-      name: map['name'] as String,
-      locationId: map['location_id'] as int,
-      imagePath: map['image_path'] as String?,
-      tags: tags,
+      id: doc.id,
+      name: data['name'] as String? ?? '',
+      locationId: (data['location_id'] as num?)?.toInt() ?? 0,
+      imagePath: data['image_path'] as String?,
+      imageUrl: data['image_url'] as String?,
+      tagIds: (data['tag_ids'] as List?)?.cast<String>() ?? const [],
+      tags: const [], // resolved later by FirestoreStorage
     );
   }
 
-  Entry withTags({List<Tag>? tags}) => Entry(
+  Entry withTags(List<Tag> resolvedTags) => Entry(
         id: id,
         name: name,
         locationId: locationId,
         imagePath: imagePath,
-        tags: tags ?? this.tags,
+        imageUrl: imageUrl,
+        tagIds: tagIds,
+        tags: resolvedTags,
       );
 
   @override
-  String toString() => 'Item(id: $id, name: $name, locationId: $locationId), tags: ${tags.length}';
-
+  String toString() =>
+      'Entry(id: $id, name: $name, locationId: $locationId, tags: ${tags.length})';
 }

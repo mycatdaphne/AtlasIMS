@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Tag {
-  final int? id;
+  final String? id;
   final String name;
   final bool isDefault;
 
@@ -9,19 +11,20 @@ class Tag {
     this.isDefault = false,
   });
 
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toFirestore() {
     return {
-      if (id != null) 'id': id,
       'name': name,
-      'is_default': isDefault ? 1 : 0,
+      'is_default': isDefault,
+      'created_at': FieldValue.serverTimestamp(),
     };
   }
 
-  factory Tag.fromMap(Map<String, dynamic> map) {
+  factory Tag.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
+    final data = doc.data() ?? const <String, dynamic>{};
     return Tag(
-      id: map['id'] as int?,
-      name: map['name'] as String,
-      isDefault: (map['is_default'] as int?) == 1,
+      id: doc.id,
+      name: data['name'] as String? ?? '',
+      isDefault: data['is_default'] as bool? ?? false,
     );
   }
 

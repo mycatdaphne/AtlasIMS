@@ -1,26 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:atlas_ims/data/sqlstorage.dart';
+import 'package:atlas_ims/data/firestore_storage.dart';
 import 'package:atlas_ims/data/schema/entry.dart';
-import 'dart:io';
-import 'package:go_router/go_router.dart';
-
 
 class AtlasList extends StatefulWidget {
   const AtlasList({super.key, required this.title, required this.db});
 
   final String title;
-  final Sqlstorage db;
+  final FirestoreStorage db;
 
   @override
   State<AtlasList> createState() => _AtlasListState();
 }
 
 class _AtlasListState extends State<AtlasList> {
-
-  Widget _buildThumbnail(String? path) {
+  Widget _buildThumbnail(String? url) {
     const size = 48.0;
 
-    if (path == null || path.isEmpty) {
+    if (url == null || url.isEmpty) {
       return Container(
         width: size,
         height: size,
@@ -33,32 +29,34 @@ class _AtlasListState extends State<AtlasList> {
       );
     }
 
-    final file = File(path);
-    if (!file.existsSync()) {
-      return Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          color: Colors.grey.shade200,
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: const Icon(Icons.broken_image, size: 24, color: Colors.grey),
-      );
-    }
-
     return ClipRRect(
       borderRadius: BorderRadius.circular(6),
-      child: Image.file(
-        file,
+      child: Image.network(
+        url,
         width: size,
         height: size,
         fit: BoxFit.cover,
+        loadingBuilder: (context, child, progress) {
+          if (progress == null) return child;
+          return Container(
+            width: size,
+            height: size,
+            color: Colors.grey.shade200,
+          );
+        },
+        errorBuilder: (_, __, ___) => Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            color: Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: const Icon(Icons.broken_image,
+              size: 24, color: Colors.grey),
+        ),
       ),
     );
   }
-
-
-    
 
   @override
   Widget build(BuildContext context) {
@@ -114,10 +112,9 @@ class _AtlasListState extends State<AtlasList> {
                 }
               },
               child: ListTile(
-                leading: _buildThumbnail(e.imagePath),
+                leading: _buildThumbnail(e.imageUrl),
                 title: Text(e.name),
                 subtitle: Text('Location ID: ${e.locationId}'),
-                onTap: () => context.push('/entries/${e.id}'),
               ),
             );
           },

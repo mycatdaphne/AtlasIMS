@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:atlas_ims/data/schema/tag.dart';
-import 'package:atlas_ims/data/sqlstorage.dart';
+import 'package:atlas_ims/data/firestore_storage.dart';
 
 class AtlasSettTags extends StatelessWidget {
   const AtlasSettTags({super.key, required this.db});
 
-  final Sqlstorage db;
+  final FirestoreStorage db;
 
   @override
   Widget build(BuildContext context) {

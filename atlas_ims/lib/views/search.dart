@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
-import 'package:atlas_ims/data/sqlstorage.dart';
 import 'package:atlas_ims/data/schema/entry.dart';
 import 'package:go_router/go_router.dart';
+import 'package:atlas_ims/data/firestore_storage.dart';
 
 class AtlasSearch extends StatefulWidget {
   const AtlasSearch({super.key, required this.title, required this.db});
 
-  final Sqlstorage db;
   final String title;
+  final FirestoreStorage db;
 
   @override
   State<AtlasSearch> createState () => _AtlasSearchState();

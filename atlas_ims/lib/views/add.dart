@@ -1,4 +1,4 @@
-import 'package:atlas_ims/data/sqlstorage.dart';
+import 'package:atlas_ims/data/firestore_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:atlas_ims/data/schema/entry.dart';
 import 'package:atlas_ims/data/imageservice.dart';
@@ -6,16 +6,13 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:atlas_ims/views/widget/tag_picker.dart';
 
-
-class AtlasAdd extends StatefulWidget { 
-
+class AtlasAdd extends StatefulWidget {
   const AtlasAdd({super.key, required this.title, required this.db});
-  final Sqlstorage db;
+  final FirestoreStorage db;
   final String title;
 
   @override
   State<AtlasAdd> createState() => _AtlasAddState();
-
 }
 
 class _AtlasAddState extends State<AtlasAdd> {
@@ -26,6 +23,7 @@ class _AtlasAddState extends State<AtlasAdd> {
 
   bool _submitting = false;
   File? _pickedImage;
+  Set<String> _selectedTagIds = {};
 
   @override
   void dispose() {
@@ -47,23 +45,26 @@ class _AtlasAddState extends State<AtlasAdd> {
     }
   }
 
-  Set<int> _selectedTagIds = {};
-
   Future<void> _submit() async {
     if (!_formkey.currentState!.validate()) return;
     setState(() => _submitting = true);
 
     try {
-      String? savedPath;
+      String? imagePath;
+      String? imageUrl;
       if (_pickedImage != null) {
-        savedPath = await _imageController.storeImgPath(_pickedImage!);
+        final result = await _imageController.uploadImage(_pickedImage!);
+        imagePath = result.path;
+        imageUrl = result.url;
       }
 
       final entry = Entry(
         name: _nameController.text.trim(),
         locationId: int.parse(_locationIdController.text.trim()),
-        imagePath: savedPath,
+        imagePath: imagePath,
+        imageUrl: imageUrl,
       );
+
       final newId = await widget.db.addEntry(
         entry,
         tagIds: _selectedTagIds.toList(),
@@ -71,7 +72,7 @@ class _AtlasAddState extends State<AtlasAdd> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Added #$newId')),
+        SnackBar(content: Text('Added ${newId.substring(0, 6)}…')),
       );
       _nameController.clear();
       _locationIdController.clear();
@@ -88,11 +89,7 @@ class _AtlasAddState extends State<AtlasAdd> {
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
-
-
-    }
-
-
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -139,14 +136,13 @@ class _AtlasAddState extends State<AtlasAdd> {
                 },
               ),
               const SizedBox(height: 16),
-
               _buildImagePreview(),
               const SizedBox(height: 24),
-
               const SizedBox(height: 16),
               const Align(
                 alignment: Alignment.centerLeft,
-                child: Text('Tags', style: TextStyle(fontWeight: FontWeight.w600)),
+                child: Text('Tags',
+                    style: TextStyle(fontWeight: FontWeight.w600)),
               ),
               const SizedBox(height: 8),
               TagPicker(
@@ -155,7 +151,6 @@ class _AtlasAddState extends State<AtlasAdd> {
                 onChanged: (next) => setState(() => _selectedTagIds = next),
               ),
               const SizedBox(height: 24),
-
               ElevatedButton(
                 onPressed: _submitting ? null : _submit,
                 style: ElevatedButton.styleFrom(

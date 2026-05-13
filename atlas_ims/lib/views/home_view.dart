@@ -1,13 +1,11 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:atlas_ims/data/sqlstorage.dart';
+import 'package:atlas_ims/data/firestore_storage.dart';
 import 'package:atlas_ims/data/schema/entry.dart';
-import 'package:go_router/go_router.dart';
 
 class AtlasHomeView extends StatelessWidget {
   const AtlasHomeView({super.key, required this.db});
 
-  final Sqlstorage db;
+  final FirestoreStorage db;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +24,6 @@ class AtlasHomeView extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // add current location name later
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
@@ -34,36 +31,28 @@ class AtlasHomeView extends StatelessWidget {
                   children: const [
                     Text(
                       '23 Upper Lake Ct',
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style:
+                          TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
                     ),
                     SizedBox(height: 4),
                     Text(
                       'Last Modified: Yesterday 2:37pm',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                      ),
+                      style:
+                          TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 24),
-
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
                   'Recently Added:',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style:
+                      TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                 ),
               ),
               const SizedBox(height: 12),
-
               if (recent.isEmpty)
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16),
@@ -80,15 +69,7 @@ class AtlasHomeView extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     itemCount: recent.length,
                     separatorBuilder: (_, __) => const SizedBox(width: 12),
-                    itemBuilder: (_, i) {
-                      final entry = recent[i];
-                      return InkWell(
-                        onTap: () => context.push('/entries/${entry.id}'),
-                        borderRadius: BorderRadius.circular(12),
-                        child: _EntryCard(entry: entry),
-                      );
-                    },
-
+                    itemBuilder: (_, i) => _EntryCard(entry: recent[i]),
                   ),
                 ),
             ],
@@ -117,10 +98,7 @@ class _EntryCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AspectRatio(
-            aspectRatio: 1,
-            child: _buildImage(),
-          ),
+          AspectRatio(aspectRatio: 1, child: _buildImage()),
           Padding(
             padding: const EdgeInsets.all(8),
             child: Column(
@@ -129,44 +107,40 @@ class _EntryCard extends StatelessWidget {
                 Text(
                   entry.name,
                   style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
+                      fontWeight: FontWeight.w600, fontSize: 14),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Location ${entry.locationId}',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade700,
-                  ),
+                  style:
+                      TextStyle(fontSize: 12, color: Colors.grey.shade700),
                 ),
-                // add tags
                 if (entry.tags.isNotEmpty) ...[
-                const SizedBox(height: 6),
-                SizedBox(
-                  height: 20,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: entry.tags.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 4),
-                    itemBuilder: (_, i) => Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade300,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        entry.tags[i].name,
-                        style: const TextStyle(fontSize: 10),
+                  const SizedBox(height: 6),
+                  SizedBox(
+                    height: 20,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: entry.tags.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: 4),
+                      itemBuilder: (_, i) => Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          entry.tags[i].name,
+                          style: const TextStyle(fontSize: 10),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
               ],
             ),
           ),
@@ -176,21 +150,34 @@ class _EntryCard extends StatelessWidget {
   }
 
   Widget _buildImage() {
-    final path = entry.imagePath;
-    if (path == null || path.isEmpty) {
+    final url = entry.imageUrl;
+    if (url == null || url.isEmpty) {
       return Container(
         color: Colors.grey.shade200,
         child: const Icon(Icons.image_not_supported,
             size: 40, color: Colors.grey),
       );
     }
-    final file = File(path);
-    if (!file.existsSync()) {
-      return Container(
+    return Image.network(
+      url,
+      fit: BoxFit.cover,
+      loadingBuilder: (context, child, progress) {
+        if (progress == null) return child;
+        return Container(
+          color: Colors.grey.shade200,
+          child: const Center(
+            child: SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          ),
+        );
+      },
+      errorBuilder: (_, __, ___) => Container(
         color: Colors.grey.shade200,
         child: const Icon(Icons.broken_image, size: 40, color: Colors.grey),
-      );
-    }
-    return Image.file(file, fit: BoxFit.cover);
+      ),
+    );
   }
 }

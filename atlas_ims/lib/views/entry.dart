@@ -1,14 +1,17 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:atlas_ims/data/sqlstorage.dart';
+import 'package:atlas_ims/data/firestore_storage.dart';
 import 'package:atlas_ims/data/schema/entry.dart';
 
 class AtlasEntryDetail extends StatelessWidget {
-  const AtlasEntryDetail({super.key, required this.db, required this.entryId});
+  const AtlasEntryDetail({
+    super.key,
+    required this.db,
+    required this.entryId,
+  });
 
-  final Sqlstorage db;
-  final int entryId;
+  final FirestoreStorage db;
+  final String entryId;
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +57,7 @@ class AtlasEntryDetail extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildImage(entry.imagePath),
+                _buildImage(entry.imageUrl),
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -116,8 +119,8 @@ class AtlasEntryDetail extends StatelessWidget {
     );
   }
 
-  Widget _buildImage(String? path) {
-    if (path == null || path.isEmpty) {
+  Widget _buildImage(String? url) {
+    if (url == null || url.isEmpty) {
       return Container(
         height: 280,
         color: Colors.grey.shade200,
@@ -127,21 +130,28 @@ class AtlasEntryDetail extends StatelessWidget {
         ),
       );
     }
-    final file = File(path);
-    if (!file.existsSync()) {
-      return Container(
+    return Image.network(
+      url,
+      height: 280,
+      width: double.infinity,
+      fit: BoxFit.cover,
+      loadingBuilder: (context, child, progress) {
+        if (progress == null) return child;
+        return Container(
+          height: 280,
+          color: Colors.grey.shade200,
+          child: const Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+      },
+      errorBuilder: (_, __, ___) => Container(
         height: 280,
         color: Colors.grey.shade200,
         child: const Center(
           child: Icon(Icons.broken_image, size: 60, color: Colors.grey),
         ),
-      );
-    }
-    return Image.file(
-      file,
-      height: 280,
-      width: double.infinity,
-      fit: BoxFit.cover,
+      ),
     );
   }
 
