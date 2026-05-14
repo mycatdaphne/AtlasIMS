@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:atlas_ims/data/firestore_storage.dart';
 import 'package:atlas_ims/data/schema/entry.dart';
 import 'package:atlas_ims/data/schema/location.dart';
+import 'package:go_router/go_router.dart';
 
 class AtlasList extends StatefulWidget {
   const AtlasList({super.key, required this.title, required this.db});
@@ -147,6 +148,9 @@ class _AtlasListState extends State<AtlasList> {
                                 leading: _buildThumbnail(e.imageUrl),
                                 title: Text(e.name),
                                 subtitle: Text(_subtitleFor(e)),
+                                onTap: e.id == null
+                                    ? null
+                                    : () => context.push('/entries/${e.id}'),
                               ),
                             );
                           },

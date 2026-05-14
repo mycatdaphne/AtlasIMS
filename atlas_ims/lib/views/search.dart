@@ -126,7 +126,9 @@ class _AtlasSearchState extends State<AtlasSearch> {
                                 ),
                             ],
                           ),
-                    onTap: () => context.push('/entries/${e.id}'),
+                    onTap: e.id == null
+                        ? null
+                        : () => context.push('/entries/${e.id}'),
                   );
                 },
               );
